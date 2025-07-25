@@ -17,7 +17,8 @@ const createShortUrl = async (req, res) => {
     });
     const domain = req.headers.host;
     // const BASE_URL = process.env.BASE_URL || `http://${domain}`;
-    const BASE_URL = process.env.BASE_URL || 'https://4f3658621488.ngrok-free.app';
+    const BASE_URL = process.env.BASE_URL || 'https://urlshortner-production-09e1.up.railway.app';
+
 
     
     // No need to include /api/url again if your route is like /:short

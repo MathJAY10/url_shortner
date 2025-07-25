@@ -1,5 +1,5 @@
 const express = require("express");
-const cors = require("cors");
+
 const dotenv = require("dotenv");
 const authRoutes = require("./routes/auth");
 const urlRoutes = require("./routes/url");
@@ -8,7 +8,18 @@ const prisma = new PrismaClient();
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const cors = require("cors");
+
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://urlshortner-production-09e1.up.railway.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
+
 app.use(express.json());
 
 // Test the router load
