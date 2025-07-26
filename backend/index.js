@@ -1,40 +1,39 @@
 const express = require("express");
-
 const dotenv = require("dotenv");
+const cors = require("cors");
+const { PrismaClient } = require("@prisma/client");
+
 const authRoutes = require("./routes/auth");
 const urlRoutes = require("./routes/url");
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+
 dotenv.config();
-
 const app = express();
-const cors = require("cors");
+const prisma = new PrismaClient();
 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://urlshortner-production-09e1.up.railway.app"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-}));
+// ✅ CORS middleware setup
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // dev frontend
+      "https://urlshortner-production-09e1.up.railway.app", // prod backend
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
-
+// ✅ JSON middleware
 app.use(express.json());
 
-// Test the router load
-console.log("Loaded authRoutes:", typeof authRoutes); // should log "function"
+// ✅ Log route load
+console.log("Loaded authRoutes:", typeof authRoutes);
 
+// ✅ Register API routes
 app.use("/api/auth", authRoutes);
 app.use("/api/url", urlRoutes);
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
-
-// ⬇️ This must come AFTER your other middlewares and routes
-app.get('/:short', async (req, res) => {
+// ✅ Dynamic redirection route
+app.get("/:short", async (req, res) => {
   const { short } = req.params;
 
   try {
@@ -46,11 +45,22 @@ app.get('/:short', async (req, res) => {
 
     await prisma.url.update({
       where: { short },
-      data: { clickCount: { increment: 1 } },
+      data: {
+        clickCount: {
+          increment: 1,
+        },
+      },
     });
 
     return res.redirect(url.original);
   } catch (err) {
+    console.error("Redirect error:", err);
     return res.status(500).send("Internal Server Error");
   }
+});
+
+// ✅ Start server AFTER all routes
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
